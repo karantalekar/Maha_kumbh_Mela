@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Panel</title>
+  <style>
+        body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f4f4f4;
+        }
+
+        h2 {
+        color: #333;
+        }
+
+        .link-box {
+        margin-top: 20px;
+        }
+
+        a {
+        display: block;
+        margin: 10px 0;
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        padding: 10px;
+        width: 200px;
+        text-align: center;
+        border-radius: 5px;
+        }
+
+        a:hover {
+        background-color: grey;
+        }
+
+        #logoutBtn {
+        margin-top: 20px;
+        background:linear-gradient(yellow,orange);
+        }
+
+        body{
+            background-image: url("https://cdn.pixabay.com/photo/2022/10/05/07/11/temple-7499927_1280.jpg");
+        }
+        #usernameDisplay{
+            color: white;
+        }
+  </style>
+</head>
+<body>
+
+  <h2 style="color: white;">Welcome, <span id="usernameDisplay"></span> </h2>
+
+  <div class="link-box">
+    <a href="aadhaar_input.html">Enter Aadhaar Details</a>
+    <a href="scanner.html">Scan QR Code</a>
+    <a href="track.html">Track Live Location</a>
+    <a href="#" id="logoutBtn">Logout</a>
+  </div>
+
+  <script>
+    // Check if user is logged in
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!user || user.role !== "user") {
+      alert("Access denied. Redirecting to login.");
+      window.location.href = "index.html";
+    } else {
+      document.getElementById("usernameDisplay").textContent = user.name || user.username;
+    }
+
+    // Logout functionality
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("loggedInUser");
+      alert("Logged out successfully!");
+      window.location.href = "index.html";
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    form {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      width: 350px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    p {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <form onsubmit="registerUser(event)">
+    <h2>📝 Register</h2>
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <select id="role" required>
+      <option value="">Select Role</option>
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button type="submit">Register</button>
+    <p>Already registered? <a href="index.html">Login here</a></p>
+  </form>
+
+  <script>
+    // Prevent registration if already logged in
+    const loggedIn = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (loggedIn) {
+      window.location.href = loggedIn.role === "admin" ? "admin_panel.html" : "user_panel.html";
+    }
+
+    function registerUser(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const role = document.getElementById("role").value;
+
+      if (!name || !username || !password || !role) {
+        alert("All fields are required.");
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // Check for existing username
+      if (users.some(user => user.username === username)) {
+        alert("Username already exists. Please choose another.");
+        return;
+      }
+
+      // Create new user
+      const newUser = { name, username, password, role };
+      users.push(newUser);
+
+      // Save to localStorage
+      localStorage.setItem("users", JSON.stringify(users));
+      alert("Registration successful! Please login.");
+      window.location.href = "index.html";
+    }
+  </script>
+
+</body>
+</html>
