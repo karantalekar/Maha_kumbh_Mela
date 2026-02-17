@@ -18,6 +18,12 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 
 # ====================
+# Root-level unwanted files
+# ====================
+*.html
+*.js
+*.css
+# ====================
 # OS & IDE files
 # ====================
 .DS_Store
