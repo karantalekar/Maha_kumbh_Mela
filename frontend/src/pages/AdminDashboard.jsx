@@ -72,8 +72,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import AdminNavbar from "./AdminNavbar";
+import { API_URL } from "../config";
 
-const socket = io("http://localhost:3000");
+const socket = io(API_URL);
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
       }
 
       axios
-        .get("http://localhost:3000/api/admin/users", {
+        .get(`${API_URL}/api/admin/users`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setUsers(res.data))

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function AdminProfile() {
@@ -21,7 +22,7 @@ export default function AdminProfile() {
     }
 
     axios
-      .get("http://localhost:3000/api/admin/profile", {
+      .get(`${API_URL}/api/admin/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -38,7 +39,7 @@ export default function AdminProfile() {
   const updateProfile = async () => {
     try {
       const res = await axios.put(
-        "http://localhost:3000/api/admin/profile",
+        `${API_URL}/api/admin/profile`,
         profile,
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -52,7 +53,7 @@ export default function AdminProfile() {
   const changePassword = async () => {
     try {
       await axios.put(
-        "http://localhost:3000/api/admin/change-password",
+        `${API_URL}/api/admin/change-password`,
         passwordData,
         { headers: { Authorization: `Bearer ${token}` } },
       );

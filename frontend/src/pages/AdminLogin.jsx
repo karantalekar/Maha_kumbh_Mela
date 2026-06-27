@@ -101,6 +101,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 const AdminLogin = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -118,10 +119,7 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/admin/login",
-        form,
-      );
+      const res = await axios.post(`${API_URL}/api/admin/login`, form);
 
       // Save token in localStorage
       localStorage.setItem("adminToken", res.data.token);

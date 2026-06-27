@@ -66,8 +66,9 @@ import axios from "axios";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { API_URL } from "../config";
 
-const socket = io("http://localhost:3000");
+const socket = io(API_URL);
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -128,8 +129,8 @@ export default function TrackUser() {
         const token = localStorage.getItem("adminToken");
         const headers = { Authorization: `Bearer ${token}` };
         const [userRes, locationsRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/admin/user/${id}`, { headers }),
-          axios.get(`http://localhost:3000/api/admin/locations/${id}`, {
+          axios.get(`${API_URL}/api/admin/user/${id}`, { headers }),
+          axios.get(`${API_URL}/api/admin/locations/${id}`, {
             headers,
           }),
         ]);

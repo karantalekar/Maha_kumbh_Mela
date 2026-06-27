@@ -113,8 +113,9 @@ import axios from "axios";
 import { io } from "socket.io-client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
-const socket = io("http://localhost:3000");
+const socket = io(API_URL);
 
 export default function UserTracking() {
   const [form, setForm] = useState({ username: "", email: "", aadhaar: "" });
@@ -132,10 +133,7 @@ export default function UserTracking() {
     setSuccess("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/users/register",
-        form,
-      );
+      const res = await axios.post(`${API_URL}/api/users/register`, form);
 
       setSuccess("Registered successfully! Live location tracking started.");
       const userId = res.data._id;

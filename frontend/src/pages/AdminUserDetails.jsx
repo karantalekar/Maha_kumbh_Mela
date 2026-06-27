@@ -40,8 +40,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { API_URL } from "../config";
 
-const socket = io("http://localhost:3000");
+const socket = io(API_URL);
 
 export default function AdminUserDetails() {
   const { id } = useParams();
@@ -52,7 +53,7 @@ export default function AdminUserDetails() {
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
     axios
-      .get(`http://localhost:3000/api/admin/user/${id}`, {
+      .get(`${API_URL}/api/admin/user/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUser(res.data))
