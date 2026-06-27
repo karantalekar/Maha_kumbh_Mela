@@ -15,7 +15,9 @@ const config = {
   jwtSecret: process.env.JWT_SECRET || "dev_jwt_secret_change_me",
   adminSecret: process.env.ADMIN_SECRET || "Admin123",
   encryptionSecret: process.env.ENCRYPTION_SECRET || "dev_encryption_secret_change_me",
-  clientUrls: splitList(process.env.CLIENT_URL || "http://localhost:5173"),
+  clientUrls: splitList(
+    process.env.CLIENT_URL || "http://localhost:5173,http://127.0.0.1:5173",
+  ),
 };
 
 const missing = [];

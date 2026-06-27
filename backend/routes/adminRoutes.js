@@ -17,6 +17,13 @@ const sanitizeAdmin = (admin) => ({
   email: admin.email,
   role: admin.role,
 });
+const safeDecrypt = (value) => {
+  try {
+    return decrypt(value) || "Unavailable";
+  } catch {
+    return "Unavailable";
+  }
+};
 
 const requireAdmin = [verifyToken, adminMiddleware];
 
@@ -191,7 +198,7 @@ router.get("/user/:id", requireAdmin, async (req, res) => {
 
     res.json({
       ...user,
-      aadhaar: decrypt(user.aadhaar),
+      aadhaar: safeDecrypt(user.aadhaar),
     });
   } catch (err) {
     res.status(500).json({ message: "Error fetching user" });

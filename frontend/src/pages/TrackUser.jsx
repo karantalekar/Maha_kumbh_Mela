@@ -58,10 +58,10 @@
 //   );
 // }
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import L from "leaflet";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -79,10 +79,13 @@ L.Icon.Default.mergeOptions({
 
 export default function TrackUser() {
   const { id } = useParams(); // user ID from route
+  const navigate = useNavigate();
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const lineRef = useRef(null);
   const userNameRef = useRef("User");
+  const [message, setMessage] = useState("Loading tracking data...");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     // Initialize map if not already
@@ -105,6 +108,10 @@ export default function TrackUser() {
 
     // Handle live location updates
     const handleLocation = (loc) => {
+      if (!loc?.latitude || !loc?.longitude || !mapRef.current || !lineRef.current) {
+        return;
+      }
+
       const pos = [loc.latitude, loc.longitude];
       const popupName = getPopupName(loc);
 
@@ -122,27 +129,34 @@ export default function TrackUser() {
 
       // Center map on the user
       mapRef.current.setView(pos, 15);
+      setMessage("Live location connected");
+      setError("");
     };
 
     const loadHistory = async () => {
       try {
         const token = localStorage.getItem("adminToken");
         const headers = { Authorization: `Bearer ${token}` };
-        const [userRes, locationsRes] = await Promise.all([
-          axios.get(`${API_URL}/api/admin/user/${id}`, { headers }),
-          axios.get(`${API_URL}/api/admin/locations/${id}`, {
-            headers,
-          }),
-        ]);
 
+        const userRes = await axios.get(`${API_URL}/api/admin/user/${id}`, {
+          headers,
+        });
         userNameRef.current =
           userRes.data.username || userRes.data.name || userRes.data.email || "User";
+
+        const locationsRes = await axios.get(
+          `${API_URL}/api/admin/locations/${id}`,
+          { headers },
+        );
 
         const points = locationsRes.data
           .filter((loc) => loc.latitude && loc.longitude)
           .map((loc) => [loc.latitude, loc.longitude]);
 
-        if (!points.length) return;
+        if (!points.length) {
+          setMessage("Waiting for this user's first location update...");
+          return;
+        }
 
         lineRef.current.setLatLngs(points);
         const latest = locationsRes.data[locationsRes.data.length - 1];
@@ -153,15 +167,29 @@ export default function TrackUser() {
         });
       } catch (err) {
         console.error("Failed to load location history:", err.response?.data || err);
+        if (err.response?.status === 401) {
+          localStorage.removeItem("adminToken");
+          navigate("/admin/login");
+          return;
+        }
+
+        setError(
+          err.response?.data?.message ||
+            "Unable to load tracking data. Check backend connection and login.",
+        );
       }
     };
 
     loadHistory();
     socket.on("liveLocation", handleLocation);
+    socket.on("connect_error", () => {
+      setError("Live tracking socket is not connected. Check backend URL/CORS.");
+    });
 
     // Cleanup on unmount
     return () => {
       socket.off("liveLocation", handleLocation);
+      socket.off("connect_error");
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -169,7 +197,26 @@ export default function TrackUser() {
       markerRef.current = null;
       lineRef.current = null;
     };
-  }, [id]);
+  }, [id, navigate]);
 
-  return <div id="map" style={{ height: "100vh", width: "100%" }} />;
+  return (
+    <div style={{ height: "100vh", width: "100%", position: "relative" }}>
+      {(message || error) && (
+        <div
+          className={`alert ${error ? "alert-danger" : "alert-info"}`}
+          style={{
+            position: "absolute",
+            zIndex: 1000,
+            top: 12,
+            left: 12,
+            right: 12,
+            maxWidth: 520,
+          }}
+        >
+          {error || message}
+        </div>
+      )}
+      <div id="map" style={{ height: "100%", width: "100%" }} />
+    </div>
+  );
 }

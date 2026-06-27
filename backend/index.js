@@ -28,6 +28,18 @@ const io = new Server(server, {
   cors: corsOptions,
 });
 
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(
+      `Port ${config.port} is already in use. Stop the existing server or run with PORT=3001.`,
+    );
+    process.exit(1);
+  }
+
+  console.error("Server failed to start:", error);
+  process.exit(1);
+});
+
 socketHandler(io);
 
 app.use(cors(corsOptions));
