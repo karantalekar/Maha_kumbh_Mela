@@ -5,17 +5,32 @@ backend/node_modules/
 backend/logs/
 backend/dist/
 backend/.env
+backend/.env.*
+!backend/.env.example
 backend/npm-debug.log*
 backend/yarn-debug.log*
+backend/pnpm-debug.log*
 
 # ====================
 # Frontend (React)
 # ====================
 frontend/node_modules/
 frontend/build/
+frontend/dist/
 frontend/.env
+frontend/.env.*
+!frontend/.env.example
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
+frontend/pnpm-debug.log*
+
+# ====================
+# Root Node workspace
+# ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
 # ====================
 # Root-level legacy static files
@@ -34,6 +49,9 @@ frontend/yarn-debug.log*
 # ====================
 .DS_Store
 Thumbs.db
+.env
+.env.*
+.history/
 .vscode/
 .idea/
 
@@ -43,4 +61,5 @@ Thumbs.db
 *.log
 *.tgz
 *.cache
+.npm/
 coverage/
