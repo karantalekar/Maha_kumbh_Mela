@@ -70,6 +70,7 @@ export default function AdminRegister() {
             name="password"
             placeholder="Password"
             required
+            minLength={8}
             value={formData.password}
             onChange={handleChange}
             style={styles.input}
@@ -81,6 +82,7 @@ export default function AdminRegister() {
             name="secret"
             placeholder="Admin Secret Key"
             required
+            autoComplete="off"
             value={formData.secret}
             onChange={handleChange}
             style={styles.input}

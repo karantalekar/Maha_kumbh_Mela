@@ -228,6 +228,9 @@ export default function UserTracking() {
               className="form-control"
               placeholder="Enter your Aadhaar"
               value={form.aadhaar}
+              inputMode="numeric"
+              pattern="[0-9]{12}"
+              maxLength={12}
               onChange={(e) => setForm({ ...form, aadhaar: e.target.value })}
               required
             />

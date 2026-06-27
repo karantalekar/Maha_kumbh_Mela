@@ -125,6 +125,7 @@ export default function AdminProfile() {
           type="password"
           className="form-control mb-2"
           placeholder="New Password"
+          minLength={8}
           value={passwordData.newPassword}
           onChange={(e) =>
             setPasswordData({ ...passwordData, newPassword: e.target.value })
