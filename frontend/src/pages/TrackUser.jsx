@@ -62,14 +62,26 @@ import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import L from "leaflet";
 import { useParams } from "react-router-dom";
+import axios from "axios";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 const socket = io("http://localhost:3000");
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 export default function TrackUser() {
   const { id } = useParams(); // user ID from route
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const lineRef = useRef(null);
+  const userNameRef = useRef("User");
 
   useEffect(() => {
     // Initialize map if not already
@@ -81,14 +93,19 @@ export default function TrackUser() {
       }).addTo(mapRef.current);
 
       lineRef.current = L.polyline([], { color: "blue" }).addTo(mapRef.current);
+      setTimeout(() => mapRef.current?.invalidateSize(), 0);
     }
 
     // Join Socket.IO room for this user
     socket.emit("join", id);
 
+    const getPopupName = (loc) =>
+      loc.username || loc.name || userNameRef.current || "User";
+
     // Handle live location updates
     const handleLocation = (loc) => {
       const pos = [loc.latitude, loc.longitude];
+      const popupName = getPopupName(loc);
 
       // Add to polyline
       lineRef.current.addLatLng(pos);
@@ -96,16 +113,49 @@ export default function TrackUser() {
       // Add or update marker
       if (!markerRef.current) {
         markerRef.current = L.marker(pos).addTo(mapRef.current);
-        markerRef.current.bindPopup(`<b>${loc.username}</b>`).openPopup();
+        markerRef.current.bindPopup(`<b>${popupName}</b>`).openPopup();
       } else {
         markerRef.current.setLatLng(pos);
-        markerRef.current.getPopup().setContent(`<b>${loc.username}</b>`);
+        markerRef.current.getPopup().setContent(`<b>${popupName}</b>`);
       }
 
       // Center map on the user
       mapRef.current.setView(pos, 15);
     };
 
+    const loadHistory = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const headers = { Authorization: `Bearer ${token}` };
+        const [userRes, locationsRes] = await Promise.all([
+          axios.get(`http://localhost:3000/api/admin/user/${id}`, { headers }),
+          axios.get(`http://localhost:3000/api/admin/locations/${id}`, {
+            headers,
+          }),
+        ]);
+
+        userNameRef.current =
+          userRes.data.username || userRes.data.name || userRes.data.email || "User";
+
+        const points = locationsRes.data
+          .filter((loc) => loc.latitude && loc.longitude)
+          .map((loc) => [loc.latitude, loc.longitude]);
+
+        if (!points.length) return;
+
+        lineRef.current.setLatLngs(points);
+        const latest = locationsRes.data[locationsRes.data.length - 1];
+        handleLocation(latest);
+        mapRef.current.fitBounds(lineRef.current.getBounds(), {
+          maxZoom: 16,
+          padding: [30, 30],
+        });
+      } catch (err) {
+        console.error("Failed to load location history:", err.response?.data || err);
+      }
+    };
+
+    loadHistory();
     socket.on("liveLocation", handleLocation);
 
     // Cleanup on unmount

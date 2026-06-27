@@ -108,7 +108,7 @@
 //   );
 // }
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -121,6 +121,7 @@ export default function UserTracking() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const watchIdRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -142,18 +143,30 @@ export default function UserTracking() {
       socket.emit("join", userId);
 
       if ("geolocation" in navigator) {
-        navigator.geolocation.watchPosition(
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+        }
+
+        const sendLocation = (pos) => {
+          socket.emit("sendLocation", {
+            userId,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+        };
+
+        navigator.geolocation.getCurrentPosition(sendLocation, () => {
+          setError("Failed to get location. Enable GPS.");
+        });
+
+        watchIdRef.current = navigator.geolocation.watchPosition(
           (pos) => {
-            socket.emit("sendLocation", {
-              userId,
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude,
-            });
+            sendLocation(pos);
           },
           () => {
             setError("Failed to get location. Enable GPS.");
           },
-          { enableHighAccuracy: true, maximumAge: 0 },
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
         );
       } else {
         setError("Geolocation not supported in your browser.");

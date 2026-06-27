@@ -14,6 +14,7 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<UserTracking />} />
+        <Route path="/register-admin" element={<AdminRegister />} />
         <Route path="/admin/register" element={<AdminRegister />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
